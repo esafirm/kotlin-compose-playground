@@ -1,4 +1,3 @@
-import androidx.compose.desktop.Window
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Button
@@ -10,32 +9,41 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import java.util.logging.Level
 import java.util.logging.Logger
 
 private val logger = Logger.getLogger("Main")
 
-fun main() = Window {
-    val (text, setText) = remember { mutableStateOf("") }
-    val (items, setItems) = remember { mutableStateOf(listOf<String>()) }
-    MaterialTheme {
-        Row {
-            Box(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                InputForm(
-                    text = text,
-                    onValueChange = { input -> setText(input) },
-                    onAddItem = { input -> setItems(items + listOf(input)) }
-                )
-            }
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Compose for Desktop",
+        state = rememberWindowState(width = 300.dp, height = 300.dp)
+    ) {
+        val (text, setText) = remember { mutableStateOf("") }
+        val (items, setItems) = remember { mutableStateOf(listOf<String>()) }
+        MaterialTheme {
+            Row {
+                Box(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    InputForm(
+                        text = text,
+                        onValueChange = { input -> setText(input) },
+                        onAddItem = { input -> setItems(items + listOf(input)) }
+                    )
+                }
 
-            Box(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                FormContent(items) { selected ->
-                    logger.log(Level.INFO, "onItemSelected: $selected")
-                    setText(selected)
+                Box(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    FormContent(items) { selected ->
+                        logger.log(Level.INFO, "onItemSelected: $selected")
+                        setText(selected)
+                    }
                 }
             }
         }

@@ -3,15 +3,14 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.32"
-    id("org.jetbrains.compose") version "0.4.0-build190"
+    kotlin("jvm")
+    id("org.jetbrains.compose")
 }
 
-group = "me.esafirm"
+group = "com.github.esafirm"
 version = "1.0.0"
 
 repositories {
-    jcenter()
     mavenCentral()
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
 }
@@ -27,7 +26,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
