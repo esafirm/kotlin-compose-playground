@@ -1,12 +1,17 @@
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -16,10 +21,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -63,7 +71,7 @@ fun main() {
             title = "Compose for Desktop",
             state = rememberWindowState(width = 600.dp, height = 600.dp)
         ) {
-            StateHolderExample()
+            DerivedStateExample()
         }
     }
 }
@@ -268,7 +276,7 @@ fun LandingScreen(onTimeout: () -> Unit, modifier: Modifier = Modifier) {
 
         LaunchedEffect(Unit) {
 
-            // The lambda will be invoked when `LaunchedEffect` enters the composition
+            // The lambda will be invoked when `LaunchedEffect` enters tkhe composition
             // and will be cancelled when `LaunchedEffect` leaves the composition
 
             delay(4_000) // Simulates loading things
@@ -388,4 +396,96 @@ private class UserInputState(
     }
 }
 
+/**
+ * `DisposableEffect` is a composable that will call `onDispose`
+ * when the composable leaves the composition.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun DisposableEffectExample() {
+    val (showOtherScreen, setShowOtherScreen) = remember { mutableStateOf(false) }
+    val (data, setData) = remember { mutableStateOf("") }
 
+    if (showOtherScreen) {
+        Text("This is the other screen. Data: $data")
+    } else {
+        // This will be called when the composable is first created
+        DisposableEffect(Unit) {
+            setData("DisposableEffect created")
+
+            // This will be called when the composable is disposed
+            onDispose {
+                println("onDispose called")
+            }
+        }
+
+        Text("This is the initial screen. Click to go to the other screen. Data: $data",
+            modifier = Modifier.onClick {
+                println("onTimeout called")
+                setShowOtherScreen(true)
+            })
+    }
+}
+
+/**
+ * Product state is a convenience function that allows you to create a state that is updated by a coroutine.
+ *
+ * Under the hood, it use `LaunchedEffect` to update the state
+ */
+@Composable
+private fun ProduceStateExample() {
+    val state by produceState(initialValue = "Loading...") {
+        delay(2000)
+        value = "Loaded"
+    }
+
+    Box(modifier = Modifier.padding(32.dp)) {
+        Text("State: $state")
+    }
+}
+
+/**
+ * `derivedStateOf {}` is used when your state or key is changing more than you want to update your UI.
+ *
+ * It's like `distinctUntilChanged` in Flow or Rx
+ */
+@Composable
+private fun DerivedStateExample() {
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    val enableButton = remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0
+        }
+    }
+
+    println("Enable button: ${enableButton.value}")
+
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(100) {
+                Text(
+                    "Item #$it", modifier = Modifier.padding(32.dp)
+                        .fillMaxSize()
+                        .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                )
+            }
+        }
+        Button(
+            onClick = {
+                scope.launch {
+                    listState.scrollToItem(0)
+                }
+            },
+            enabled = enableButton.value,
+            modifier = Modifier.fillMaxWidth()
+                .align(Alignment.BottomCenter)
+        ) {
+            Text("Scroll to top")
+        }
+    }
+}

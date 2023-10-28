@@ -27,21 +27,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import java.util.Stack
 
-enum class Page {
-    FIRST,
-    SECOND
+sealed class Page(val composable: @Composable () -> Unit) {
+
+    object FirstPage : Page({ FirstScreen() })
+    class SecondPage(val args: Args) : Page({ SecondScreen(args) }) {
+        data class Args(
+            val passedData: String
+        )
+    }
 }
 
 val ActiveRouter = compositionLocalOf<Router> { error("No active router provided") }
 
 class Router {
-    private val currentPage = mutableStateOf(Page.FIRST)
+    private val stack: Stack<Page> = Stack()
+
+    private val currentPage = mutableStateOf<Page>(Page.FirstPage)
 
     fun current() = currentPage.value
 
     fun push(page: Page) {
+        stack.push(currentPage.value)
         currentPage.value = page
+    }
+
+    fun pop() {
+        if (stack.isNotEmpty()) {
+            currentPage.value = stack.pop()
+        }
     }
 }
 
@@ -75,25 +90,31 @@ fun RouterHandler(isUseAnimatedVisibility: Boolean) {
     CompositionLocalProvider(ActiveRouter provides router) {
         val currentPage = router.current()
 
-        if (isUseAnimatedVisibility) {
-            // Because there can be two or more components drawn in the layout, we need Box to make sure
-            // there is no alignment or arrangement affect our components
-            Box {
-                SlideInSlideOut(isVisible = currentPage == Page.FIRST) {
-                    FirstScreen()
+        Column {
+            if (isUseAnimatedVisibility) {
+                // Because there can be two or more components drawn in the layout, we need Box to make sure
+                // there is no alignment or arrangement affect our components
+                Box {
+                    SlideInSlideOut(isVisible = currentPage is Page.FirstPage) {
+                        FirstScreen()
+                    }
+                    SlideInSlideOut(isVisible = currentPage is Page.SecondPage) {
+                        SecondScreen(args = Page.SecondPage.Args("Hello"))
+                    }
                 }
-                SlideInSlideOut(isVisible = currentPage == Page.SECOND) {
-                    SecondScreen()
+            } else {
+                // Just use simple cross-fade animation. This *should* ensure that only one component is available/drawn
+                // Can we do the same thing with different behavior?
+                Crossfade(targetState = currentPage) { page ->
+                    page.composable()
                 }
             }
-        } else {
-            // Just use simple cross fade animation. This *should* ensure that only one component is available/drawn
-            // Can we do the same thing with different behavior?
-            Crossfade(targetState = currentPage) { page ->
-                when (page) {
-                    Page.FIRST -> FirstScreen()
-                    Page.SECOND -> SecondScreen()
-                }
+
+            Button(
+                onClick = { router.pop() },
+                modifier = Modifier.padding(top = 16.dp)
+            ) {
+                Text(text = "Pop Backstack")
             }
         }
     }
@@ -105,7 +126,7 @@ fun FirstScreen() {
     Column {
         Text(text = "This is the first screen")
         Button(
-            onClick = { router.push(Page.SECOND) },
+            onClick = { router.push(Page.SecondPage(args = Page.SecondPage.Args("Hello from First"))) },
         ) {
             Text(text = "Navigate to second screen")
         }
@@ -113,12 +134,12 @@ fun FirstScreen() {
 }
 
 @Composable
-fun SecondScreen() {
+fun SecondScreen(args: Page.SecondPage.Args) {
     val router = ActiveRouter.current
     Column {
-        Text(text = "This is the second screen")
+        Text(text = "This is the second screen. Arg: ${args.passedData}")
         Button(
-            onClick = { router.push(Page.FIRST) }
+            onClick = { router.push(Page.FirstPage) }
         ) {
             Text("Go Back")
         }
