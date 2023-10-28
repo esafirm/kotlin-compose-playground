@@ -72,7 +72,7 @@ fun main() {
             title = "Compose for Desktop",
             state = rememberWindowState(width = 600.dp, height = 600.dp)
         ) {
-            DerivedStateExample()
+            ComposePhases()
         }
     }
 }
@@ -228,6 +228,10 @@ private fun StateHoistingExample() {
     }
 }
 
+/**
+ * A composable function that demo the usage of `rememberCoroutineScope`,
+ * `rememberUpdatedState`, and `LaunchedEffect`
+ */
 @Composable
 private fun AdvanceStateExample() {
     val (showContent, setShowContent) = remember { mutableStateOf(false) }
@@ -277,7 +281,7 @@ private fun LandingScreen(onTimeout: () -> Unit, modifier: Modifier = Modifier) 
 
         LaunchedEffect(Unit) {
 
-            // The lambda will be invoked when `LaunchedEffect` enters tkhe composition
+            // The lambda will be invoked when `LaunchedEffect` enters the composition
             // and will be cancelled when `LaunchedEffect` leaves the composition
 
             delay(4_000) // Simulates loading things
