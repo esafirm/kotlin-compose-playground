@@ -264,7 +264,7 @@ private fun AdvanceStateExample() {
  * A composable that shows a splash image and will trigger a callback after a delay.
  */
 @Composable
-fun LandingScreen(onTimeout: () -> Unit, modifier: Modifier = Modifier) {
+private fun LandingScreen(onTimeout: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 
         // This will always refer to the latest onTimeout function that
@@ -402,7 +402,7 @@ private class UserInputState(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DisposableEffectExample() {
+private fun DisposableEffectExample() {
     val (showOtherScreen, setShowOtherScreen) = remember { mutableStateOf(false) }
     val (data, setData) = remember { mutableStateOf("") }
 

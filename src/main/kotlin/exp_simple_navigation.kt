@@ -85,7 +85,7 @@ fun main() = application {
 }
 
 @Composable
-fun RouterHandler(isUseAnimatedVisibility: Boolean) {
+private fun RouterHandler(isUseAnimatedVisibility: Boolean) {
     val router = remember { Router() }
     CompositionLocalProvider(ActiveRouter provides router) {
         val currentPage = router.current()
@@ -121,7 +121,7 @@ fun RouterHandler(isUseAnimatedVisibility: Boolean) {
 }
 
 @Composable
-fun FirstScreen() {
+private fun FirstScreen() {
     val router = ActiveRouter.current
     Column {
         Text(text = "This is the first screen")
@@ -134,7 +134,7 @@ fun FirstScreen() {
 }
 
 @Composable
-fun SecondScreen(args: Page.SecondPage.Args) {
+private fun SecondScreen(args: Page.SecondPage.Args) {
     val router = ActiveRouter.current
     Column {
         Text(text = "This is the second screen. Arg: ${args.passedData}")
@@ -147,7 +147,7 @@ fun SecondScreen(args: Page.SecondPage.Args) {
 }
 
 @Composable
-fun SlideInSlideOut(isVisible: Boolean, content: @Composable () -> Unit) {
+private fun SlideInSlideOut(isVisible: Boolean, content: @Composable () -> Unit) {
     AnimatedVisibility(
         isVisible,
         enter = slideIn(

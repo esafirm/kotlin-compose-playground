@@ -10,6 +10,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * A composable Cart Item that apply state hoisting to manage its state.
+ */
 @Composable
 fun CartItem(
     itemName: String,
@@ -32,6 +35,9 @@ fun CartItem(
     }
 }
 
+/**
+ * A composable Cart Item that manage its state internally.
+ */
 @Composable
 fun ManagedCartItem(
     itemName: String
