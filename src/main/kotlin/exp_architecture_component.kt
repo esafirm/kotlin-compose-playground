@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -469,7 +470,11 @@ private fun DerivedStateExample() {
         ) {
             items(100) {
                 Text(
-                    "Item #$it", modifier = Modifier.padding(32.dp)
+                    text = "Item #$it",
+                    fontSize = 22.sp,
+                    modifier = Modifier
+                        .height(80.dp)
+                        .padding(horizontal = 32.dp, vertical = 8.dp)
                         .fillMaxSize()
                         .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
                 )
@@ -478,7 +483,7 @@ private fun DerivedStateExample() {
         Button(
             onClick = {
                 scope.launch {
-                    listState.scrollToItem(0)
+                    listState.animateScrollToItem(0)
                 }
             },
             enabled = enableButton.value,
